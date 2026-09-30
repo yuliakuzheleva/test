@@ -383,3 +383,8 @@ git pull
 Важно: commit и push — это не одно и то же. commit сохраняет изменения локально, push отправляет их на GitHub.
 
 
+=======
+hello world
+hello 
+im a first year student of Mathemetic and Mechanic
+
