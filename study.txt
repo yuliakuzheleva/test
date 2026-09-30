@@ -1,4 +1,385 @@
 
-hello world  я те дам паразитка
+Git — команды и что они делают
+1. Перейти в папку репозитория
+cd /d D:\git\test
+
+cd — перейти в папку.
+
+/d позволяет одновременно перейти на другой диск.
+
+Например, ты находишься на C:, а репозиторий на D::
+
+cd /d D:\git\test
+Работа с файлом
+2. Скопировать файл в репозиторий
+copy C:\Users\Andrey\source\repos\TestGit.cpp .
+
+Смысл:
+
+copy [откуда] [куда]
+
+. означает текущая папка.
+
+Например:
+
+copy C:\test\TestGit.cpp .
+
+Если в пути есть пробел:
+
+copy "C:\My Files\TestGit.cpp" .
+Проверить состояние Git
+3. git status
+git status
+
+Очень важная команда.
+
+Показывает:
+
+какие файлы изменены;
+какие новые;
+какие удалены;
+что уже подготовлено через git add;
+находится ли Git сейчас в rebase;
+есть ли конфликт.
+
+Можно практически всегда начинать с:
+
+git status
+Добавить изменения
+4. git add
+
+Для конкретного файла:
+
+git add TestGit.cpp
+
+Это означает:
+
+«Git, подготовь этот файл для следующего commit».
+
+Для всех изменений:
+
+git add .
+Commit
+5. Создать commit
+git commit -m "Add TestGit.cpp"
+
+commit — сохранить подготовленные изменения в локальной истории Git.
+
+-m — сообщение commit.
+
+Например:
+
+git commit -m "Add new file"
+
+Важно:
+
+git add
+   ↓
+git commit
+
+git add не отправляет на GitHub.
+
+git commit тоже не отправляет на GitHub.
+
+Они работают локально.
+
+Настройка имени и email
+6. Имя автора commit
+git config --global user.name "Kuzheleva"
+7. Email автора
+git config --global user.email "kuzheleva08@bk.ru"
+
+Это обычно делается один раз на компьютере.
+
+Проверить:
+
+git config --global user.name
+git config --global user.email
+Отправить на GitHub
+8. git push
+git push
+
+Вот это уже:
+
+локальный Git
+      ↓
+   GitHub
+
+То есть нормальная последовательность:
+
+git add TestGit.cpp
+git commit -m "Add TestGit.cpp"
+git push
+Забрать изменения с GitHub
+9. Обычный git pull
+git pull
+
+Забирает изменения с GitHub и пытается объединить их с локальными.
+
+Если Git говорит non-fast-forward
+
+Например:
+
+! [rejected] main -> main (non-fast-forward)
+
+Это означает:
+
+На GitHub есть изменения, которых нет у тебя локально.
+
+В нашем случае мы использовали:
+
+git pull --rebase origin main
+
+Что означает:
+
+git pull
+    ↓
+забрать изменения с GitHub
+    ↓
+rebase
+    ↓
+поставить твои commit поверх новых изменений
+
+После успешного завершения:
+
+git push
+Если pull --rebase говорит
+error: cannot pull with rebase:
+You have unstaged changes.
+
+Это означает:
+
+У тебя есть изменения, которые ещё не сохранены в commit.
+
+Сначала:
+
+git status
+
+Посмотри, какие файлы изменены.
+
+Если изменения нужны
+
+Обычно:
+
+git add .
+git commit -m "описание изменений"
+Если изменения не нужны
+
+Можно восстановить файл:
+
+git restore имя_файла
+
+Мы использовали:
+
+git restore README.md study.txt
+
+Это отменило локальные изменения этих файлов и вернуло их к состоянию последнего commit.
+
+Конфликт при rebase
+
+У нас было:
+
+CONFLICT (content): Merge conflict in study.txt
+
+Это означает:
+
+Git обнаружил, что один и тот же участок файла изменён в двух версиях.
+
+Git вставляет:
+
+<<<<<<< HEAD
+версия с GitHub
+=======
+твоя версия
+>>>>>>> b911ff9
+
+Ты вручную выбираешь, что должно остаться.
+
+Например:
+
+hello world я те дам паразитка
+
+А все эти служебные строки удаляешь:
+
+<<<<<<< HEAD
+=======
+>>>>>>> b911ff9
+
+Сохраняешь файл.
+
+Затем:
+
+git add study.txt
+
+Это сообщает Git:
+
+«Конфликт в study.txt разрешён».
+
+После этого:
+
+git rebase --continue
+Если git rebase --continue открывает редактор
+
+Может появиться:
+
+Add TestGit.cpp
+
+# Conflicts:
+#       study.txt
+
+Это редактор Vim.
+
+Если сообщение commit тебя устраивает:
+
+Esc
+:wq
+Enter
+
+То есть:
+
+Esc — выйти из режима редактирования;
+:wq — сохранить и выйти;
+Enter — выполнить.
+
+После этого rebase продолжится.
+
+Если git status говорит
+interactive rebase in progress
+
+Значит:
+
+rebase ещё не закончен.
+
+Если одновременно написано:
+
+all conflicts fixed: run "git rebase --continue"
+
+нужно:
+
+git rebase --continue
+
+Не надо пока делать git push.
+
+Если случайно сделал git push во время rebase
+
+Git может сказать:
+
+fatal: You are not currently on a branch.
+
+Это потому, что во время rebase Git временно находится в состоянии detached HEAD.
+
+Продолжаешь:
+
+git rebase --continue
+
+После полного окончания rebase снова появится нормальная ветка main.
+
+Тогда:
+
+git push
+Если хочешь отменить весь rebase
+
+Есть команда:
+
+git rebase --abort
+
+Она отменяет текущий rebase и возвращает состояние до начала rebase.
+
+Это полезно, если запутался в конфликте и хочешь начать заново.
+
+Если конфликт разрешён
+
+Последовательность:
+
+git add study.txt
+git rebase --continue
+
+Если rebase закончен:
+
+git status
+
+Если всё нормально:
+
+git push
+Главная схема, которую тебе стоит запомнить
+Я создал/изменил файл и хочу отправить его на GitHub:
+git status
+git add имя_файла
+git commit -m "описание"
+git push
+GitHub уже изменён, а push выдаёт non-fast-forward:
+git pull --rebase origin main
+
+Если всё нормально:
+
+git push
+pull --rebase обнаружил конфликт:
+CONFLICT
+
+Тогда:
+
+1. Открыть файл
+2. Выбрать нужный вариант
+3. Удалить <<<<<<< ======= >>>>>>>
+4. Сохранить
+
+Затем:
+
+git add имя_файла
+git rebase --continue
+
+Если снова конфликт — опять разрешаешь его и:
+
+git add имя_файла
+git rebase --continue
+
+Если rebase закончен:
+
+git push
+И самое главное — четыре команды
+
+Если убрать всю сложность:
+
+git status
+
+Что происходит?
+
+git add
+
+Что отправить в следующий commit?
+
+git commit
+
+Сохранить изменения в локальной истории.
+
+git push
+
+Отправить историю на GitHub.
+
+А обратное направление:
+
+git pull
+
+Забрать изменения с GitHub.
+
+И вот это уже хорошая базовая схема для твоей тетради:
+
+             GitHub
+                ↑
+             git push
+                ↑
+             commit
+                ↑
+             git add
+                ↑
+          файлы на ПК
+
+             GitHub
+                ↓
+             git pull
+                ↓
+          файлы на ПК
+
+Важно: commit и push — это не одно и то же. commit сохраняет изменения локально, push отправляет их на GitHub.
 
 
